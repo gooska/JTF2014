@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="exporter-version" content="Evernote Mac 6.0.6 (451290)"/><meta name="altitude" content="17.34430885314941"/><meta name="author" content="Ryota Masuue"/><meta name="created" content="2014-06-22 07:34:47 +0000"/><meta name="latitude" content="35.73705686363843"/><meta name="longitude" content="139.7700071325346"/><meta name="updated" content="2014-07-08 08:05:27 +0000"/><title>JTF2014/06/22 ⑦ 17:00 大規模エンターテイメントサイトを支える技術― DMM.comの裏側をお見せしますー</title></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+# 大規模エンターテイメントサイトを支える技術― DMM.comの裏側をお見せしますー
+
+	
+	<div><br/></div>
+
+	
+	<div>ツチノコブログ</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>80Gbps、毎日のピークトラフィック</div>
+
+	
+	<div>イベント時は100Gbpsを越える。</div>
+
+	
+	<div>ダークファイバー、データセンター接続</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>コアルータ</div>
+
+	
+	<div>その下はコアファブリック、エッジファブリック</div>
+
+	
+	<div>いかに個々のシステムを接続</div>
+
+	
+	<div>物理サーバ2500</div>
+
+	
+	<div>仮想サーバ2000</div>
+
+	
+	<div>ロードバランサは50台</div>
+
+	
+	<div>仮想は混在。。。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>Juniper QFabric     コアファブリックに採用</div>
+
+	
+	<div>複数の筐体を1大のスイッチのようにオペレーションできる。</div>
+
+	
+	<div>物理は一の自由度が向上。</div>
+
+	
+	<div>3〜4名で運用している。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>エッジファブリック</div>
+
+	
+	<div>ウェブポータル     Juniper Virtual Chassic</div>
+
+	
+	<div>共有ストレージ     Brocade VCS </div>
+
+	
+	<div>管理ネットワーク     OpenFlow</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>とあるすプロジェクト</div>
+
+	
+	<div>筐体はブレードサーバ</div>
+
+	
+	<div>すべて仮想インスタンス</div>
+
+	
+	<div>HyperVisore はVMWare</div>
+
+	
+	<div>共有ストレージHO 3PAR</div><div>データベースはLVSを使ったフルアクティブ</div>
+
+	
+	<div>プロビジョニングツール Ansible</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>パブリッククラウド、CDNの利用</div>
+
+	
+	<div>データセンターインフラだけでサービスできない部分は、外部のシステムを使っています。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>オンプレミスのほうが低コストだけどkゲーム開発会社(SAP)が慣れた環境で開発した方がスピードアップできるおとが多い</div>
+
+	
+	<div>スピード優先</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>負荷分散</div>
+
+	
+	<div>GSLBデぶんっs何</div>
+
+	
+	<div>     トラフィック容量が多いサービス、複数のデータセンターにまたがるサービスにりようしている。</div>
+
+	
+	<div>WEBはSNAT(ReverseProxy)</div>
+
+	
+	<div>     一部URLマッチによるL7いよる分散もしている</div>
+
+	
+	<div>     SSLは基本はサーバでかけている</div>
+
+	
+	<div>DBレイヤハL2DSR・・・拠点またぎもあり</div>
+
+	
+	<div>     グローバルIPをもたない、内部的な俯瞰分散はL2DSR</div>
+
+	
+	<div>     L3DSRは今は使っていない</div>
+
+	
+	<div>     アプライアンス(A10)</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>CDN</div>
+
+	
+	<div>スパイクトラフィックにあわせて、回線トラフィックを仕入れるよりも、CDN使った方が安い。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>BCP・・・上流回線の流量が大きくなったり、遅延発生時に、別の上流回線に移動させる</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>動画配信</div>
+
+	
+	<div>ファイルサイズが大きく、大容量ストレージが必要</div>
+
+	
+	<div>マルチデバイス対応で、エンコーディングの種類が多い</div>
+
+	
+	<div>ロングテールなので、負荷予測が難しい</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>ファイルサイズが大きく、大容量ストレージが必要</div>
+
+	
+	<div>     GlusterFS</div>
+
+	
+	<div>          汎用2Uのサーバに大容量HDDを積んで運用。</div>
+
+	
+	<div>          lsが遅いなどのにがてなこともあるが、、、</div>
+
+	
+	<div>          毎日2TBづつ増えている。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>マルチデバイス対応で、エンコーディングの種類が多い</div>
+
+	
+	<div>多種多様な組合せがある</div>
+
+	
+	<div>300台24時間でエンコーディングしている。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>コンテンツアクセス制御</div>
+
+	
+	<div>キャッシュにヒットしない突然のコンテンツアクセスは、付加を見ながら人がコンテンツを他サーバに移動させて負荷分散させている。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>CDN、クラウドの利用</div>
+
+	
+	<div>キャンペーン、アイドルグループ中継などは、CDNを柔軟に使うことで対応</div>
+
+	
+	<div>CDNで対応できない場合に備えて、パブリッククラウドで対応できる仕組みも用意している。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>サービス間の連携</div>
+
+	
+	<div>認証APIナド、システム間疎結合のための仕組みを用意している。</div>
+
+	
+	<div>サービス開発会社は自分たちが扱いやすい環境でサービス運用がデキル。</div>
+
+	
+	<div>一般向けのAPIもある。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>その他おもしろそうな技術</div>
+
+	
+	<div>画像専用サーバ</div>
+
+	
+	<div>NANDフラッシュメモリの利用</div>
+
+	
+	<div>MySQLサーバh基本的にはNANDフラッシュメモリを使う。</div>
+
+	
+	<div>Fusion-io、Huawei、Viridentなど複数ベンダ製品を利用</div>
+
+	
+	<div>SSDドライブも積極的に利用予定</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>NANDフラッシュメモリで、</div>
+
+	
+	<div>CDNカラデータンセンターに回帰した上で、サーバ台数の減少に精工。</div>
+
+	
+	<div>低コストと早さの両立。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>ログ袖手と解析</div>
+
+	
+	<div>fluentd, elasticsearch, kibana</div>
+
+	
+	<div>ビジュアライゼーションっていいね。。。</div>
+
+	
+	<div>WEBだけじゃなく、MySQLログもできるよ。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>運用</div>
+
+	
+	<div>Nagios</div>
+
+	
+	<div>Munin</div>
+
+	
+	<div>Zabbix</div>
+
+	
+	<div>Icinga・・・ロードバランサ監視している!?</div>
+
+	
+	<div>-----------</div>
+
+	
+	<div>MRTG</div>
+
+	
+	<div>Cacti</div>
+
+	
+	<div>SmokePing</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>朝会による情報共有</div>
+
+	
+	<div>     ⇒開発チームとの情報共有も、議事録やアジェンダでやっているのかな？</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>情報共有のツール</div>
+
+	
+	<div>チャット</div>
+
+	
+	<div>racktablesによる構成管理　←これが一番主？</div>
+
+	
+	<div>チケット(JIRA)によるタスク管理</div>
+
+	
+	<div>Confluenceによる情報管理</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>メール</div>
+
+	
+	<div>Google Drive</div>
+
+	
+	<div>グループウェア</div>
+
+	
+	<div>Wiki</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>設備刷新</div>
+
+	
+	<div>リース切れ時に、リース更新をしたら負け</div>
+
+	
+	<div>ベンダは特定しない</div>
+
+	
+	<div>スイッチのバッファサイズなど、最低限のスペックは決めている</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>勉強会の実施</div>
+
+	
+	<div>　部内でやっているそうだ。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div>今後のチャレンジ</div>
+
+	
+	<div>     自社クラウドシステム構築</div>
+
+	
+	<div>     10分いないにサーバを提供できる環境を作る</div>
+
+	
+	<div>     CloduStackとか、OpenStackとか、いろいろお試し中。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>ピアリングの推進　 AS23620</div>
+
+	
+	<div>     どんどんピアリング先を増やしていきます。</div>
+
+	
+	<div>     インターネットの大規模障害児にもエンドユーザにサービスを届けたい</div>
+
+	
+	<div>     エンドユーザまでのホップ数を減らしたい</div>
+
+	
+	<div>     ・・・なんだかおもしろそうな試み</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>データセンターの継続的見直し</div>
+
+	
+	<div>     各拠点でラックが100〜120</div>
+
+	
+	<div>     システムの刷新と併せて継続的に見直しを行っていく。</div>
+
+	
+	<div><br/></div>
+
+	
+	<div>来月のジャノグ？ミーティング</div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+	
+	<div><br/></div>
+
+
+
+
+
+
+</body></html>

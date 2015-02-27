@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="exporter-version" content="Evernote Mac 6.0.6 (451290)"/><meta name="altitude" content="23.6289005279541"/><meta name="author" content="Ryota Masuue"/><meta name="created" content="2014-06-22 07:30:11 +0000"/><meta name="latitude" content="35.60657861386716"/><meta name="longitude" content="139.7481116518021"/><meta name="source" content="mobile.iphone"/><meta name="updated" content="2014-06-22 12:04:47 +0000"/><title>JTF2014/06/22 ④ 13:45 クラウドストレージを自前で構築できる「OpenStack Swift」をPuppetで数百台自動構築して見えた課題と現状のベストプラクティス</title></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">#クラウドストレージを自前で構築できる「OpenStack Swift」をPuppetで数百台自動構築して見えた課題と現状のベストプラクティス</span><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">・OpenStack Swiftとは</span><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　RackSpaceのオンラインストレーじっサービスで使われていた基盤ソフト</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　IaaS(nova)出使うならVMイメージバックアップ</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">・ProxyとStrageで構成される</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Proxyは振り分けのみ</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Storageはデータ格納</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Proxy⇒Strageデータをなべるルール(ringファイル)に従う</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　冗長を確保しながらデータを書き込む(データを書き込むとき3つ選んで書き込む)</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Strageは同じデータを持っているStrageを知っている。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　定期的にお互いのオブジェクトを監視している。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　ディスクが壊れたら・・・3つを下回り堅牢製が下がるので、別のディスクにsyncする。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Proxyを増やす・・・スループットが増す。NWボトルネックになりやすい</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Strageを増やす・・・容量をふやす。IOがボトルネックになりやすい</span></div>
+<div><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">こんなのが適している！！</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">・スケールアウト型</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　 スモールスタートしたくて、終局の見積もりが難しい、見積もりしたくない</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">・</span></font><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">長期保存型</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　ハード弁だを非依存にしたい。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　300GB、600GBなどの混在（ヘテロ？）</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　激甚対策（３つ書き込む）・・・北海道、東京、翁湾処が可能</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　・高速・性能重視</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　1つのファイルにアクセスが集中する。（読み取りが得意）</span></div>
+<div><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　既存ファイルサーバから、3年経過したデータなどのスタック環境として。</span><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">・OpenStack数百台を構築して見えてきた課題</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　構築：数百台</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　検証／本番：合計6セット</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　品質：高水準</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　メンバ：少人数</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　kickstart     OS・パッケージのインストール自動化</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Puppet     設定ファイルデプロイ</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Subversion</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　pssh     並列シェルの実行（平行でファイル転送、取得）</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　IPMI     電源管理。リモートから電源をONするため。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Puppet     クラサバ形式(Puppet Master/Client)だと、Clientが入っているサーバが壊れると、</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">                    証明書？削除、再登録が大変だ。。。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　自動構築</span></font></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　IPMIデ全台電源ON</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　KickstartでOSインストール（自動）</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　資材とマニフェストを一括チェックアウト</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Puppetを使って一括ファイルデプロイ</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　自動テスト</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　OpenStack Swiftに、Tempestというのがある。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　ただ、Community版のSwiftのTempestは機能貧弱なので、時前で作り込んだ。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Tempestでできないこと</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Swiftのバックグランド処理の試験はできない</span></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　バックグラウンド処理の試験は、事前に別途実施した</span></font></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　トラブル</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　検証環境のファイルを間違って本番環境へデプロイしてしまった。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　別の理由で手視していたプロセスが、Puppet実行で意図せず起動してしまった。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　ファイルは性格にデプロイした。しかし設定反映されておらず、想定外の事象が発生した。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　本番環境へのプロビジョニング運用って、正しくないのでは？</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Puppetは環境差分を管理してくれるわけではない。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Puppetは定義された通りに起動しただけ。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Puppetは設定の反映までは面倒をみてくれない。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　⇒本番環境へプロビジョニング運用をしつづけることはやめたい！</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　↓</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">・これからのインフラ・プロビジョニング・プランとは</span><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Immutable Infrastructure</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　１ど構成したっさー場には2度と変更を加えない。変更時は新たな環境に差し替える。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　Blue Green・・・(2面を切り替える)をもう一歩進めた考え方。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　OSの設定はプロビジョニングツールでコード化できるけど、</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　OSのイメ ージ作成からできないのかな？</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　　Docker</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　　　Packer     </span><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">複数プラットフォームに対応した、プラットフォームビルドツール</span></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">                            仮想マシン定義ファイル（json)をもとにビルド</span></font></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　初期はAWS、で、規模拡大に伴いPrivateクラウド←OpenStackとかがここででてくるのか。</span></font></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　↑　こういう成長プランの提案時に、DockerとかPackerが向いているのか。。。</span></font></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;"><br/></span></font></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　基本はPackerを使っておく。(Dockerfileでビルドしない）</span></font></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　Dockerはあくまでもプラットフォームと見なす。</span></font></div>
+<div><font color="#333333" face="Helvetica, Arial"><span style="line-height: 21px;">　　⇒Dockerはもはやプラットフォームとみなす。</span></font></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">　Dockerの利用はまだ課題がある・・・</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">     DBはImmutableにできるのか？DBaaSにすべき？</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">     ログ管理どうする？集約型？Fluentd？</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">     RHEL7から？RHEL5のみ対応アプリけっこうあるよ？　←うちは関係ないか。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">     プライベートリポジトリの管理、だれがやるの？</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;">     ⇒いきなり全部Immutableにするのは難しい。。。</span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><br/></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+<div><span style="background-color:rgb(255, 250, 165);-evernote-highlight:true;color: rgb(51, 51, 51); font-family: Helvetica, Arial; font-size: 13px; line-height: 21px;"><br/></span></div>
+</body></html>
