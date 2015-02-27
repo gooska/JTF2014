@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="exporter-version" content="Evernote Mac 6.0.6 (451290)"/><meta name="altitude" content="23.6289005279541"/><meta name="author" content="Ryota Masuue"/><meta name="created" content="2014-06-22 07:29:03 +0000"/><meta name="latitude" content="35.60657861386716"/><meta name="longitude" content="139.7481116518021"/><meta name="source" content="mobile.iphone"/><meta name="updated" content="2014-06-22 12:04:36 +0000"/><title>JTF2014/06/22 ③ 12:45 Dockerのエンタープライズ開発での活用モデル</title></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+<div># Dockerのエンタープライズ開発での活用モデル<br/></div>
+<div>以下の点の評判を検証してみた。</div>
+<div>・軽い<br/></div>
+<div>　　何が違う？</div>
+<div>　　ハードウェア仮想化／コンテナ仮想化</div>
+<div>　　速い。</div>
+<div>　　仮想化されているもの：ハードウェアを仮想化／OS</div>
+<div>　　同居できるモノ：異なるOS／異なるディストリビューション(カーネルは共有)</div>
+<div><br/></div>
+<div>　　物理/Docker/VirtualBoxを比較してみた。</div>
+<div>　　CPU/Memory/FileIO・・・物理とほとんど変わらない性能。</div>
+<div><br/></div>
+<div>・使いやすい</div>
+<div>　　apacheのサービスを起動してみる。</div>
+<div>　　後片付けも簡単。</div>
+<div>　　イメージコピーもしたい。・・・ポータブル。</div>
+<div>　　　→Docker registry</div>
+<div>　　　　　イメージを簡単にPush &amp; Pull</div>
+<div>　　　　　Publicなら、、、Docker HUB</div>
+<div>　　　　　Privateでは、、、Docker Registry</div>
+<div>　　どこでも使える。</div>
+<div>　　　物理サーバで作った環境を、クラウドへ。</div>
+<div><br/></div>
+<div>・AUFS</div>
+<div>　複数のファイルシステムをあたかも一つのファイルシステムのようにみせる。</div>
+<div>　・・・メモ追いつかず。</div>
+<div><br/></div>
+<div>・コンテナ仮想化</div>
+<div>　Namespace</div>
+<div>　　PID</div>
+<div>　　NET</div>
+<div>　　・・・6つのNamespaceを実装している。</div>
+<div>　　Host上からはvethという仮想NICの形で見える。</div>
+<div>　cgroup</div>
+<div>　　コンテナでそれぞれのプロセスがどれくらいリソースを使ってイイかを管理する。</div>
+<div><br/></div>
+<div>　⇒軽くて使いやすい。後は事例を聞いて判断してね♪</div>
+<div><br/></div>
+<div># 事例紹介</div>
+<div>・エンタープライズとは？</div>
+<div>　　製品の数が多く環境のいれかえがよくある。</div>
+<div>　　古いバージョンの保守がある。</div>
+<div><br/></div>
+<div>・継続的インテグレーション</div>
+<div>　CIの問題点</div>
+<div>　　アプリ実行バージョン、Jenkinsのバージョンが違っている。</div>
+<div>　　ライブラリがない。</div>
+<div>　　それぞれのバージョン用の環境を作る！！⇒Dockerで実現。</div>
+<div>　　ソースコードに対応するバージョンを簡単にすばやく準備できる。</div>
+<div><br/></div>
+<div>　動作チェック用のアプリ実行環境をDockerで仮想化</div>
+<div>　　誰かのアプリが問題を起こしても、影響がない。</div>
+<div>　　コンテナを残さなければならない、、、</div>
+<div>　　GitLaのマージリクエスト時に、Jenkinsのジョブで削除</div>
+<div><br/></div>
+<div>　Dockerを使った開発環境</div>
+<div>　　Eclipseなどをコンテナした。</div>
+<div>　　xpraでホスト側にセッションを張って・・・・</div>
+<div><br/></div>
+<div>　同じデータベースを利用　　←これスゴイね</div>
+<div>　　上海から東京のDBを利用・・・、しかし遅い。</div>
+<div>　　東京で、Master Private RegistryにPush</div>
+<div>　　上海では、Slave Private RegistryからPull</div>
+<div><br/></div>
+<div>　CI環境、開発環境、評価環境、データベース</div>
+<div><br/></div>
+<div>　本番ではまだDocker使っていない。</div>
+<div>　　開発/評価環境で試しながら模索中。</div>
+<div><br/></div>
+<div>　AWS上で使うことで、コスト的なメリットはでているか？</div>
+<div>　　AWWSではまだだが、社内リソースの有効活用ができそうだ。</div>
+<div>　　　古いPCでコンテナを使うなど。。。</div>
+<div><br/></div>
+<div><br/></div>
+</body></html>
